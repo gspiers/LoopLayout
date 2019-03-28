@@ -9,20 +9,20 @@
 import UIKit
 
 private let reuseIdentifier = "ExampleCellIdentifier"
-private let numberOfCells = 20
+private let numberOfCells = 8
 
 class ExampleViewController: UIViewController {
     @IBOutlet weak var accessibilityView: AccessibilityView!
     @IBOutlet weak var collectionView: UICollectionView!
-    var layout: LoopLayout!
+    var layout: DialLayout!
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        layout = LoopLayout()
+        layout = DialLayout()
         collectionView.collectionViewLayout = layout
 
-        let exampleCellNib = UINib(nibName: "ExampleCell", bundle: nil)
+        let exampleCellNib = UINib(nibName: "DialCell", bundle: nil)
         collectionView.register(exampleCellNib, forCellWithReuseIdentifier: reuseIdentifier)
 
         collectionView.isAccessibilityElement = false
@@ -30,6 +30,13 @@ class ExampleViewController: UIViewController {
         accessibilityView.accessibilityTraits = [.adjustable, .button, .header]
         accessibilityView.accessibilityHint = "Activates the cell"
         accessibilityView.delegate = self
+
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(didTap))
+        self.view.addGestureRecognizer(gesture)
+    }
+
+    @objc func didTap() {
+        accessibilityIncrement(view: accessibilityView)
     }
 }
 
@@ -41,11 +48,11 @@ extension ExampleViewController: UICollectionViewDataSource {
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! ExampleCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! DialCell
 
         // Configure the cell
-        cell.label.text = "Cell: \(indexPath.row)"
-        cell.backgroundColor = indexPath.row == 0 ? UIColor.yellow : UIColor.green
+        let logo = UIImage(named: "logo_\(indexPath.row)")
+        cell.itemImageView.image = logo
 
         return cell
     }

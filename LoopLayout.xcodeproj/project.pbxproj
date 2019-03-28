@@ -17,6 +17,9 @@
 		373F7098223E82EA00E9F2F5 /* ExampleViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 373F7097223E82EA00E9F2F5 /* ExampleViewController.swift */; };
 		373F709C223E83AC00E9F2F5 /* ExampleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 373F709A223E83AC00E9F2F5 /* ExampleCell.swift */; };
 		373F709D223E83AC00E9F2F5 /* ExampleCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 373F709B223E83AC00E9F2F5 /* ExampleCell.xib */; };
+		377B81B5224D8927003EAA1D /* DialCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 377B81B4224D8927003EAA1D /* DialCell.swift */; };
+		377B81B7224D8945003EAA1D /* DialCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 377B81B6224D8945003EAA1D /* DialCell.xib */; };
+		377B81B9224D8D43003EAA1D /* DialLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 377B81B8224D8D43003EAA1D /* DialLayout.swift */; };
 		37D44E87224D76E90012901D /* LoopLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D44E86224D76E90012901D /* LoopLayout.swift */; };
 /* End PBXBuildFile section */
 
@@ -33,6 +36,9 @@
 		373F7097223E82EA00E9F2F5 /* ExampleViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleViewController.swift; sourceTree = "<group>"; };
 		373F709A223E83AC00E9F2F5 /* ExampleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleCell.swift; sourceTree = "<group>"; };
 		373F709B223E83AC00E9F2F5 /* ExampleCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ExampleCell.xib; sourceTree = "<group>"; };
+		377B81B4224D8927003EAA1D /* DialCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DialCell.swift; sourceTree = "<group>"; };
+		377B81B6224D8945003EAA1D /* DialCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DialCell.xib; sourceTree = "<group>"; };
+		377B81B8224D8D43003EAA1D /* DialLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialLayout.swift; sourceTree = "<group>"; };
 		37D44E86224D76E90012901D /* LoopLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopLayout.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -141,6 +147,7 @@
 		373F7099223E838B00E9F2F5 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				377B81B6224D8945003EAA1D /* DialCell.xib */,
 				373F709B223E83AC00E9F2F5 /* ExampleCell.xib */,
 			);
 			path = Views;
@@ -149,6 +156,7 @@
 		373F709E223E83B200E9F2F5 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				377B81B4224D8927003EAA1D /* DialCell.swift */,
 				373F709A223E83AC00E9F2F5 /* ExampleCell.swift */,
 			);
 			path = Views;
@@ -158,6 +166,7 @@
 			isa = PBXGroup;
 			children = (
 				37D44E86224D76E90012901D /* LoopLayout.swift */,
+				377B81B8224D8D43003EAA1D /* DialLayout.swift */,
 			);
 			path = Layouts;
 			sourceTree = "<group>";
@@ -220,6 +229,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				377B81B7224D8945003EAA1D /* DialCell.xib in Resources */,
 				373F709D223E83AC00E9F2F5 /* ExampleCell.xib in Resources */,
 				373F707A223E79AE00E9F2F5 /* LaunchScreen.storyboard in Resources */,
 				373F7077223E79AE00E9F2F5 /* Assets.xcassets in Resources */,
@@ -237,6 +247,8 @@
 				373F709C223E83AC00E9F2F5 /* ExampleCell.swift in Sources */,
 				373F7072223E79AC00E9F2F5 /* ViewController.swift in Sources */,
 				373F7098223E82EA00E9F2F5 /* ExampleViewController.swift in Sources */,
+				377B81B5224D8927003EAA1D /* DialCell.swift in Sources */,
+				377B81B9224D8D43003EAA1D /* DialLayout.swift in Sources */,
 				37D44E87224D76E90012901D /* LoopLayout.swift in Sources */,
 				373ED34A22465DCF00F4B343 /* Array+shift.swift in Sources */,
 				373ED34C22465E1F00F4B343 /* UICollectionViewLayoutAttributes+copy.swift in Sources */,
