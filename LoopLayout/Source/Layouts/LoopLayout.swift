@@ -122,8 +122,24 @@ extension LoopLayout {
         return true
     }
 
-    override func invalidateLayout(with context: UICollectionViewLayoutInvalidationContext) {
+    override func invalidationContext(forBoundsChange newBounds: CGRect) -> UICollectionViewLayoutInvalidationContext {
+        let context = super.invalidationContext(forBoundsChange: newBounds)
+        guard let cv = collectionView else { return context }
 
+        // If we are scrolling off the leading/trailing offsets we need to adjust contentOffset so we can 'wrap' around.
+        // This will be seamless for the user as the current momentum is maintained.
+        if cv.contentOffset.x >= trailingOffsetX {
+            let offset = CGPoint(x: -contentWidth, y: 0)
+            context.contentOffsetAdjustment = offset
+        } else if cv.contentOffset.x <= leadingOffsetX {
+            let offset = CGPoint(x: contentWidth, y: 0)
+            context.contentOffsetAdjustment = offset
+        }
+
+        return context
+    }
+
+    override func invalidateLayout(with context: UICollectionViewLayoutInvalidationContext) {
         // Re-ask the delegate for centered indexpath if we ever reload data
         if context.invalidateEverything || context.invalidateDataSourceCounts {
             layoutAttributes = []
