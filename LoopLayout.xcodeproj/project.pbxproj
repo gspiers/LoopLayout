@@ -17,6 +17,7 @@
 		373F7098223E82EA00E9F2F5 /* ExampleViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 373F7097223E82EA00E9F2F5 /* ExampleViewController.swift */; };
 		373F709C223E83AC00E9F2F5 /* ExampleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 373F709A223E83AC00E9F2F5 /* ExampleCell.swift */; };
 		373F709D223E83AC00E9F2F5 /* ExampleCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 373F709B223E83AC00E9F2F5 /* ExampleCell.xib */; };
+		37D44E87224D76E90012901D /* LoopLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D44E86224D76E90012901D /* LoopLayout.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		373F7097223E82EA00E9F2F5 /* ExampleViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleViewController.swift; sourceTree = "<group>"; };
 		373F709A223E83AC00E9F2F5 /* ExampleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleCell.swift; sourceTree = "<group>"; };
 		373F709B223E83AC00E9F2F5 /* ExampleCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ExampleCell.xib; sourceTree = "<group>"; };
+		37D44E86224D76E90012901D /* LoopLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopLayout.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -155,6 +157,7 @@
 		373F709F223E849600E9F2F5 /* Layouts */ = {
 			isa = PBXGroup;
 			children = (
+				37D44E86224D76E90012901D /* LoopLayout.swift */,
 			);
 			path = Layouts;
 			sourceTree = "<group>";
@@ -234,6 +237,7 @@
 				373F709C223E83AC00E9F2F5 /* ExampleCell.swift in Sources */,
 				373F7072223E79AC00E9F2F5 /* ViewController.swift in Sources */,
 				373F7098223E82EA00E9F2F5 /* ExampleViewController.swift in Sources */,
+				37D44E87224D76E90012901D /* LoopLayout.swift in Sources */,
 				373ED34A22465DCF00F4B343 /* Array+shift.swift in Sources */,
 				373ED34C22465E1F00F4B343 /* UICollectionViewLayoutAttributes+copy.swift in Sources */,
 				373F7070223E79AC00E9F2F5 /* AppDelegate.swift in Sources */,

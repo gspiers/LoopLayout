@@ -13,9 +13,13 @@ private let numberOfCells = 20
 
 class ExampleViewController: UIViewController {
     @IBOutlet weak var collectionView: UICollectionView!
+    var layout: LoopLayout!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        layout = LoopLayout()
+        collectionView.collectionViewLayout = layout
 
         let exampleCellNib = UINib(nibName: "ExampleCell", bundle: nil)
         collectionView.register(exampleCellNib, forCellWithReuseIdentifier: reuseIdentifier)
