@@ -18,6 +18,7 @@ class LoopLayout: UICollectionViewLayout {
         return itemSize.width + itemXSpacing
     }
     private let contentMultiple: CGFloat = 2 // Number of repeating content sections, use double the space of the content so content has room to wrap around.
+    private var arcRadius: CGFloat = 400 // Radius of the circle that the cells will arc over.
 
     private var contentWidth: CGFloat {
         let totalItemAndSpacingWidth = (CGFloat(itemCount) * itemAndSpacingWidth)
@@ -104,6 +105,8 @@ extension LoopLayout {
 
             attributes.center = CGPoint(x: currentX, y: attributes.center.y)
             currentX += itemAndSpacingWidth
+
+            adjustAttribute(attributes)
         }
     }
 
@@ -176,5 +179,25 @@ extension LoopLayout {
         hasSetInitialContentOffsetOnce = true
 
         cv.setContentOffset(initialContentOffset, animated: false)
+    }
+
+    private func adjustAttribute(_ attribute: UICollectionViewLayoutAttributes) {
+        guard let cv = collectionView else { return }
+
+        let visibleRect = CGRect(origin: cv.contentOffset, size: cv.bounds.size)
+
+        // If the cell is on screen it needs to be translated to the arc.
+        let activeArcDistance = (visibleRect.width + itemSize.width) / 2.0
+
+        let distanceFromCenter = abs(visibleRect.midX - attribute.center.x)
+
+        var transform: CATransform3D = CATransform3DIdentity
+
+        if distanceFromCenter < activeArcDistance {
+            let yTranslation = arcRadius - sqrt((arcRadius * arcRadius) - (distanceFromCenter * distanceFromCenter))
+            transform = CATransform3DMakeTranslation(0, yTranslation, 0)
+        }
+
+        attribute.transform3D = transform
     }
 }
