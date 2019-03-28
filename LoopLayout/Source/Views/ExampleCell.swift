@@ -14,7 +14,8 @@ class ExampleCell: UICollectionViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        
+        isAccessibilityElement = false
+        contentView.isAccessibilityElement = false
     }
 
 }

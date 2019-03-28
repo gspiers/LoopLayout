@@ -8,15 +8,22 @@
 
 import UIKit
 
+class LoopLayoutInvalidationContext: UICollectionViewLayoutInvalidationContext {
+    var boundsSizeDidChange: Bool = false
+    var accessibilityDidChange: Bool = false
+}
+
 class LoopLayout: UICollectionViewLayout {
 
     // MARK: Private properties
+    private let notificationCenter = NotificationCenter.default
     private var itemCount = 0
     private let itemSize = CGSize(width: 80, height: 80)
     private let itemXSpacing: CGFloat = 20.0
     private var itemAndSpacingWidth: CGFloat {
         return itemSize.width + itemXSpacing
     }
+    private let contentMultiple: CGFloat = 2 // Number of repeating content sections, use double the space of the content so content has room to wrap around.
     private var arcRadius: CGFloat = 400 // Radius of the circle that the cells will arc over.
 
     private var contentWidth: CGFloat {
@@ -25,10 +32,16 @@ class LoopLayout: UICollectionViewLayout {
     }
 
     private var leadingOffsetX: CGFloat {
-        return insetWidth
+        guard let cv = collectionView else { return insetWidth }
+        return shouldWrap ? insetWidth : cv.frame.width / 2.0
     }
     private var trailingOffsetX: CGFloat {
-        return collectionViewContentSize.width - insetWidth
+        var widthAdjustment = insetWidth
+        if !shouldWrap, let cv = collectionView {
+            widthAdjustment = cv.frame.width / 2.0
+        }
+
+        return collectionViewContentSize.width - widthAdjustment
     }
 
     // This needs to be large enough that a fast swipe will naturally come to a stop before bouncing.
@@ -36,8 +49,48 @@ class LoopLayout: UICollectionViewLayout {
 
     private var hasSetInitialContentOffsetOnce = false
 
+    private var hasEnoughContentToWrap: Bool {
+        guard let cv = collectionView else { return false }
+        // Only wrap around if there is enough content to fill the screen.
+        return contentWidth > (cv.frame.width + itemAndSpacingWidth)
+    }
+
+    private var shouldWrap: Bool {
+        let isAccessibilityRunning = UIAccessibility.isSwitchControlRunning || UIAccessibility.isVoiceOverRunning
+        return !isAccessibilityRunning && hasEnoughContentToWrap
+    }
+
     private var layoutAttributes: [UICollectionViewLayoutAttributes] = []
     private var adjustedLayoutAttributes: [UICollectionViewLayoutAttributes] = []
+
+    // MARK: Lifecycle
+
+    override init() {
+        super.init()
+        commonInit()
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        commonInit()
+    }
+
+    private func commonInit() {
+        notificationCenter.addObserver(self, selector: #selector(LoopLayout.accessibilityDidChange), name: UIAccessibility.voiceOverStatusDidChangeNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(LoopLayout.accessibilityDidChange), name: UIAccessibility.switchControlStatusDidChangeNotification, object: nil)
+    }
+
+    deinit {
+        notificationCenter.removeObserver(self, name: UIAccessibility.voiceOverStatusDidChangeNotification, object: nil)
+        notificationCenter.removeObserver(self, name: UIAccessibility.switchControlStatusDidChangeNotification, object: nil)
+    }
+}
+
+// MARK: UICollectionViewLayout static overrides
+extension LoopLayout {
+    override class var invalidationContextClass: AnyClass {
+        return LoopLayoutInvalidationContext.self
+    }
 }
 
 // MARK: UICollectionViewLayout overrides
@@ -45,8 +98,16 @@ extension LoopLayout {
     override var collectionViewContentSize: CGSize {
         guard let cv = collectionView else { return .zero }
 
-        let totalInsetWidth = insetWidth * 2.0
-        let totalContentWidth = totalInsetWidth + contentWidth
+        let totalContentWidth: CGFloat
+        if shouldWrap {
+            let totalInsetWidth = insetWidth * 2.0
+            totalContentWidth = totalInsetWidth + contentWidth
+        } else {
+            // The contentWidth has one extra full item's width on the end as the content wraps.
+            // We need to remove this as we aren't wrapping in this case.
+            let extraWidth = itemAndSpacingWidth
+            totalContentWidth = contentWidth + cv.frame.width - extraWidth
+        }
 
         return CGSize(width: totalContentWidth, height: cv.frame.height)
     }
@@ -101,9 +162,10 @@ extension LoopLayout {
         currentX += (contentWidth * CGFloat(multiple))
 
         for attributes in adjustedLayoutAttributes {
-
-            attributes.center = CGPoint(x: currentX, y: attributes.center.y)
-            currentX += itemAndSpacingWidth
+            if shouldWrap {
+                attributes.center = CGPoint(x: currentX, y: attributes.center.y)
+                currentX += itemAndSpacingWidth
+            }
 
             adjustAttribute(attributes)
         }
@@ -131,38 +193,57 @@ extension LoopLayout {
 
         // If we are scrolling off the leading/trailing offsets we need to adjust contentOffset so we can 'wrap' around.
         // This will be seamless for the user as the current momentum is maintained.
-        if cv.contentOffset.x >= trailingOffsetX {
-            let offset = CGPoint(x: -contentWidth, y: 0)
-            context.contentOffsetAdjustment = offset
-        } else if cv.contentOffset.x <= leadingOffsetX {
-            let offset = CGPoint(x: contentWidth, y: 0)
-            context.contentOffsetAdjustment = offset
+        if shouldWrap {
+            if cv.contentOffset.x >= trailingOffsetX {
+                let offset = CGPoint(x: -contentWidth, y: 0)
+                context.contentOffsetAdjustment = offset
+            } else if cv.contentOffset.x <= leadingOffsetX {
+                let offset = CGPoint(x: contentWidth, y: 0)
+                context.contentOffsetAdjustment = offset
+            }
         }
 
         return context
     }
 
     override func invalidateLayout(with context: UICollectionViewLayoutInvalidationContext) {
+        guard let loopContext = context as? LoopLayoutInvalidationContext else {
+            assertionFailure("Unexpected invalidation context type: \(context)")
+            super.invalidateLayout(with: context)
+            return
+        }
+
         // Re-ask the delegate for centered indexpath if we ever reload data
-        if context.invalidateEverything || context.invalidateDataSourceCounts {
+        if loopContext.invalidateEverything || loopContext.invalidateDataSourceCounts || loopContext.accessibilityDidChange {
             layoutAttributes = []
             adjustedLayoutAttributes = []
             hasSetInitialContentOffsetOnce = false
         }
 
-        super.invalidateLayout(with: context)
+        super.invalidateLayout(with: loopContext)
     }
 }
 
 // MARK: Private methods
 extension LoopLayout {
+    @objc private func accessibilityDidChange() {
+        let invalidationContext = LoopLayoutInvalidationContext()
+        invalidationContext.accessibilityDidChange = true
+        invalidateLayout(with: invalidationContext)
+    }
+
     private func initialContentOffset() -> CGPoint? {
         guard let cv = collectionView, itemCount > 0 else { return nil }
 
         let firstIndexPath = IndexPath(item: 0, section: 0)
         let attributes = layoutAttributes[firstIndexPath.item]
         // Start at the end of the content if we are wrapping.
-        let initialContentOffsetX = contentWidth
+        let initialContentOffsetX: CGFloat
+        if shouldWrap {
+            initialContentOffsetX = contentWidth
+        } else {
+            initialContentOffsetX = 0
+        }
 
         let centeredOffsetX = (attributes.center.x + initialContentOffsetX) - (cv.frame.width / 2.0)
         let contentOffsetAdjustment = CGPoint(x: centeredOffsetX, y: 0)
@@ -197,5 +278,34 @@ extension LoopLayout {
         }
 
         attribute.transform3D = transform
+    }
+}
+
+// MARK: Public methods
+extension LoopLayout {
+
+    public func closestIndexPathToCenter() -> IndexPath? {
+        guard let cv = collectionView else { return nil }
+        let viewCenterX = cv.contentOffset.x + (cv.frame.width / 2.0)
+
+        // Find the nearest index path nearest to center of cv frame.
+        // We use a rect here so that we don't test a point that lands between cells.
+
+        let centerRect = CGRect(x: viewCenterX - (itemAndSpacingWidth / 2.0), y: 0, width: itemAndSpacingWidth, height: cv.bounds.height)
+        if let attributesInRect = layoutAttributesForElements(in: centerRect), let firstAttribute = attributesInRect.first {
+            var closestAttribute = firstAttribute
+            var closestDistance = abs(closestAttribute.center.x - viewCenterX)
+            for attributes in attributesInRect {
+                let distance = abs(attributes.center.x - viewCenterX)
+                if distance < closestDistance {
+                    closestAttribute = attributes
+                    closestDistance = distance
+                }
+            }
+            return closestAttribute.indexPath
+        } else {
+            // Either no cells or we are looping around.
+            return nil
+        }
     }
 }

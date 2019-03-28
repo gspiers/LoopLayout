@@ -12,6 +12,7 @@ private let reuseIdentifier = "ExampleCellIdentifier"
 private let numberOfCells = 20
 
 class ExampleViewController: UIViewController {
+    @IBOutlet weak var accessibilityView: AccessibilityView!
     @IBOutlet weak var collectionView: UICollectionView!
     var layout: LoopLayout!
     
@@ -23,6 +24,13 @@ class ExampleViewController: UIViewController {
 
         let exampleCellNib = UINib(nibName: "ExampleCell", bundle: nil)
         collectionView.register(exampleCellNib, forCellWithReuseIdentifier: reuseIdentifier)
+
+        collectionView.isAccessibilityElement = false
+        accessibilityView.isAccessibilityElement = true
+        accessibilityView.accessibilityTraits = [.adjustable, .button, .header]
+        accessibilityView.accessibilityHint = "Activates the cell"
+        accessibilityView.delegate = self
+        accessibilityElements = [accessibilityView]
     }
 }
 
@@ -41,5 +49,43 @@ extension ExampleViewController: UICollectionViewDataSource {
         cell.backgroundColor = indexPath.row == 0 ? UIColor.yellow : UIColor.green
 
         return cell
+    }
+}
+
+extension ExampleViewController: AccessibilityViewDelegate {
+    func accessibilityIncrement(view: AccessibilityView) {
+
+        guard let centeredIndexPath = layout.closestIndexPathToCenter() else { return }
+        guard (centeredIndexPath.item + 1) < numberOfCells else { return }
+        let nextIndexPath = IndexPath(item: centeredIndexPath.item + 1, section: 0)
+
+        accessibilityView.accessibilityValue = "Cell: \(nextIndexPath.row)"
+        collectionView.scrollToItem(at: nextIndexPath, at: .centeredHorizontally, animated: true)
+    }
+
+    func accessibilityDecrement(view: AccessibilityView) {
+        guard let centeredIndexPath = layout.closestIndexPathToCenter() else { return }
+        guard (centeredIndexPath.item - 1) >= 0 else { return }
+        let previousIndexPath = IndexPath(item: centeredIndexPath.item - 1, section: 0)
+
+        accessibilityView.accessibilityValue = "Cell: \(previousIndexPath.row)"
+        collectionView.scrollToItem(at: previousIndexPath, at: .centeredHorizontally, animated: true)
+    }
+}
+
+protocol AccessibilityViewDelegate: class {
+    func accessibilityIncrement(view: AccessibilityView)
+    func accessibilityDecrement(view: AccessibilityView)
+}
+
+class AccessibilityView: UIView {
+    weak var delegate: AccessibilityViewDelegate?
+
+    override func accessibilityIncrement() {
+        delegate?.accessibilityIncrement(view: self)
+    }
+
+    override func accessibilityDecrement() {
+        delegate?.accessibilityDecrement(view: self)
     }
 }
